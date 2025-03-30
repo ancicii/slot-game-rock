@@ -3,6 +3,8 @@ import { Balance } from './Balance';
 import { Bet } from './Bet';
 import { SpinButton } from './SpinButton';
 import { Reel } from '../components/Reel';
+import { Symbol } from '../components/Symbol';
+import { WonContainer } from './Won';
 
 export class UIManager {
   private app: PIXI.Application;
@@ -10,6 +12,7 @@ export class UIManager {
   private balance!: Balance;
   private bet!: Bet;
   private spinButton!: SpinButton;
+  private wonContainer!: WonContainer;
   private reels: Reel[];
   private spinCount = 0; 
 
@@ -32,6 +35,7 @@ export class UIManager {
     this.spinButton = new SpinButton(this.uiContainer, this.app, () =>
       this.onSpin()
     );
+    this.wonContainer = new WonContainer(this.uiContainer, this.app);
   }
 
   private getRandomWinningLine(): number[] {
@@ -42,12 +46,13 @@ export class UIManager {
   }
 
   public onSpin() {
+    this.wonContainer.showWin(0);
     let completedReels = 0;
     this.spinCount++;
     this.spinButton.disable();
     this.balance.increaseBalance(-this.bet.getBet());
     const isWin = this.spinCount % 5 === 0;
-    const winningSymbolIndex = isWin ? Math.floor(Math.random() * 9) : null;
+    const winningSymbolName = isWin ? Symbol.generateWinningSymbol() : null;
     const winningLine = this.getRandomWinningLine();
     const winLengths = [3, 4, 5];
     const winningLength = winLengths[Math.floor(Math.random() * winLengths.length)];
@@ -55,10 +60,11 @@ export class UIManager {
     this.reels.forEach((reel, index) => {
       setTimeout(() => {
         if(isWin && winningLength > index){
-          reel.spinReel(winningSymbolIndex, winningLine[index]).then(() => {
+          reel.spinReel(winningSymbolName, winningLine[index]).then(() => {
             completedReels++;
             if (completedReels === this.reels.length) {
-              this.calculateWinnings(this.checkWinningLines());
+              let win = this.wonContainer.calculateWinnings(this.checkWinningLines(), this.bet);
+              this.balance.increaseBalance(win);
               this.spinButton.enable();
             }
           });
@@ -67,61 +73,30 @@ export class UIManager {
             completedReels++;
   
             if (completedReels === this.reels.length) {
-              this.calculateWinnings(this.checkWinningLines());
+              let win = this.wonContainer.calculateWinnings(this.checkWinningLines(), this.bet);
+              this.balance.increaseBalance(win);
               this.spinButton.enable();
             }
           });
         }
         
-      }, index * 500);
+      }, index * 200);
     });
   }
 
-  public calculateWinnings(
-    winningResults: { line: number[]; count: number }[]
-  ) {
-    for (const result of winningResults) {
-      const winningSymbol = this.reels[0].getActiveSymbols()[result.line[0]];
-      if ([1, 2, 3, 4, 5].includes(winningSymbol)) {
-        if (result.count === 3) {
-          this.balance.increaseBalance(this.bet.getBet() * 0.5);
-        } else if (result.count === 4) {
-          this.balance.increaseBalance(this.bet.getBet() * 1.5);
-        } else {
-          this.balance.increaseBalance(this.bet.getBet() * 4);
-        }
-      } else if ([6, 7].includes(winningSymbol)) {
-        if (result.count === 3) {
-          this.balance.increaseBalance(this.bet.getBet() * 1.5);
-        } else if (result.count === 4) {
-          this.balance.increaseBalance(this.bet.getBet() * 7);
-        } else {
-          this.balance.increaseBalance(this.bet.getBet() * 10);
-        }
-      } else if ([8, 9].includes(winningSymbol)) {
-        if (result.count === 3) {
-          this.balance.increaseBalance(this.bet.getBet() * 2);
-        } else if (result.count === 4) {
-          this.balance.increaseBalance(this.bet.getBet() * 10);
-        } else {
-          this.balance.increaseBalance(this.bet.getBet() * 20);
-        }
-      }
-    }
-  }
-
-  public checkWinningLines(): { line: number[]; count: number }[] {
-    let winningResults: { line: number[]; count: number }[] = [];
+  public checkWinningLines(): { line: number[]; count: number; winningSymbol: string | null }[] {
+    let winningResults: { line: number[]; count: number; winningSymbol: string | null }[] = [];
 
     for (const line of this.winningLines) {
       let firstSymbol = this.reels[0].getActiveSymbols()[line[0]];
+      let winningSymbol = firstSymbol === "wild" ? null : firstSymbol;
       let consecutiveSymbols = 1;
 
       for (let reelIndex = 1; reelIndex < this.reels.length; reelIndex++) {
         const currentSymbol =
           this.reels[reelIndex].getActiveSymbols()[line[reelIndex]];
-
-        if (currentSymbol === firstSymbol) {
+        if(!winningSymbol && currentSymbol !== "wild") winningSymbol = currentSymbol;
+        if (currentSymbol === winningSymbol || currentSymbol === "wild" || (consecutiveSymbols === 1 && firstSymbol === "wild")) {
           consecutiveSymbols++;
         } else {
           break;
@@ -132,21 +107,22 @@ export class UIManager {
         winningResults.push({
           line: [...line],
           count: consecutiveSymbols,
+          winningSymbol
         });
 
-        for (let reelIndex = 0; reelIndex < this.reels.length; reelIndex++) {
-          const reel = this.reels[reelIndex];
-          const symbol = reel.getActiveSymbolAt(line[reelIndex]);
+        // for (let reelIndex = 0; reelIndex < this.reels.length; reelIndex++) {
+          // const reel = this.reels[reelIndex];
+          // const symbol = reel.getActiveSymbolAt(line[reelIndex]);
 
-          const frame = PIXI.Sprite.from('main_game/frame.png');
-          frame.width = symbol.width + 10;
-          frame.height = symbol.height + 10;
-          frame.x = symbol.x - 5;
-          frame.y = symbol.y - 5;
-          frame.name = 'frame';
+          // const frame = PIXI.Sprite.from('main_game/frame.png');
+          // frame.width = symbol.width + 10;
+          // frame.height = symbol.height + 10;
+          // frame.x = symbol.x - 5;
+          // frame.y = symbol.y - 5;
+          // frame.name = 'frame';
 
-          reel.container.addChild(frame);
-        }
+          // reel.container.addChild(frame);
+        // }
       }
     }
     return winningResults;

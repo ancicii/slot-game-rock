@@ -16,7 +16,7 @@ export class Bet {
     const betBg = new PIXI.Sprite(PIXI.Texture.from('main_game/ui/b2.png'));
     betBg.anchor.set(0.5);
     betBg.position.set(150, app.screen.height - 50);
-    betBg.scale.set(0.5, 2.9);
+    betBg.scale.set(0.3, 0.4);
     uiContainer.addChild(betBg);
 
     this.betText = new PIXI.Text(this.bet, {
@@ -34,10 +34,10 @@ export class Bet {
 
   private addArrows(uiContainer: PIXI.Container, app: PIXI.Application) {
     const leftArrow = new PIXI.Sprite(
-      PIXI.Texture.from('main_game/ui/arrow_back.png')
+      PIXI.Texture.from('main_game/ui/minus.png')
     );
     leftArrow.anchor.set(0.5);
-    leftArrow.scale.set(0.5);
+    leftArrow.scale.set(0.3);
     leftArrow.position.set(100, app.screen.height - 50);
     leftArrow.interactive = true;
     leftArrow.cursor = 'pointer';
@@ -45,10 +45,10 @@ export class Bet {
     uiContainer.addChild(leftArrow);
 
     const rightArrow = new PIXI.Sprite(
-      PIXI.Texture.from('main_game/ui/arrow_forward.png')
+      PIXI.Texture.from('main_game/ui/plus.png')
     );
     rightArrow.anchor.set(0.5);
-    rightArrow.scale.set(0.5);
+    rightArrow.scale.set(0.3);
     rightArrow.position.set(200, app.screen.height - 50);
     rightArrow.interactive = true;
     rightArrow.cursor = 'pointer';

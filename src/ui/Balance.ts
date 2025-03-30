@@ -8,7 +8,7 @@ export class Balance {
     const balanceBg = new PIXI.Sprite(PIXI.Texture.from('main_game/ui/b2.png'));
     balanceBg.anchor.set(0.5);
     balanceBg.position.set(app.screen.width - 150, app.screen.height - 50);
-    balanceBg.scale.set(0.7, 2.9);
+    balanceBg.scale.set(0.5, 0.4);
     uiContainer.addChild(balanceBg);
 
     this.balanceText = new PIXI.Text('1000', {

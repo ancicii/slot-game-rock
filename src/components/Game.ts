@@ -42,21 +42,24 @@ export class Game {
     const assetsFolder = 'main_game';
     return new Promise((resolve) => {
       PIXI.Assets.load([
-        `${assetsFolder}/icon_1.png`,
-        `${assetsFolder}/icon_2.png`,
-        `${assetsFolder}/icon_3.png`,
-        `${assetsFolder}/icon_4.png`,
-        `${assetsFolder}/icon_5.png`,
-        `${assetsFolder}/icon_6.png`,
-        `${assetsFolder}/icon_7.png`,
-        `${assetsFolder}/icon_8.png`,
-        `${assetsFolder}/icon_9.png`,
-        `${assetsFolder}/back.png`,
-        `${assetsFolder}/ui/start_btn.png`,
-        `${assetsFolder}/ui/arrow_back.png`,
-        `${assetsFolder}/ui/arrow_forward.png`,
-        `${assetsFolder}/ui/b2.png`,
+        `${assetsFolder}/low_1.png`,
+        `${assetsFolder}/low_2.png`,
+        `${assetsFolder}/low_3.png`,
+        `${assetsFolder}/high_1.png`,
+        `${assetsFolder}/high_2.png`,
+        `${assetsFolder}/high_3.png`,
+        `${assetsFolder}/high_4.png`,
+        `${assetsFolder}/high_5.png`,
+        `${assetsFolder}/wild.png`,
+        `${assetsFolder}/bonus.png`,
+        `${assetsFolder}/bg_main_landscape.jpg`,
         `${assetsFolder}/frame.png`,
+        `${assetsFolder}/bg_main_landscape.jpg`,
+        `${assetsFolder}/ui/spin.png`,
+        `${assetsFolder}/ui/spin_selected.png`,
+        `${assetsFolder}/ui/minus.png`,
+        `${assetsFolder}/ui/plus.png`,
+        `${assetsFolder}/ui/b2.png`,
       ]).then(() => {
         resolve();
       });
@@ -80,7 +83,7 @@ export class Game {
 
   private addBackground() {
     if (!this.app) return;
-    const bg = new PIXI.Sprite(PIXI.Texture.from('main_game/back.png'));
+    const bg = new PIXI.Sprite(PIXI.Texture.from('main_game/bg_main_landscape.jpg'));
     bg.width = this.app.screen.width;
     bg.height = this.app.screen.height;
     this.app.stage.addChildAt(bg, 0);
@@ -89,7 +92,12 @@ export class Game {
   private createReels() {
     if (!this.app) return;
     this.reelsContainer.removeChildren();
+
+    const frame = PIXI.Sprite.from('main_game/frame.png');
+
+    this.app.stage.addChild(frame);
     this.app.stage.addChild(this.reelsContainer);
+
     for (let i = 0; i < 5; i++) {
       const reel = new Reel(i * 90 + i * 10, 0);
       reel.container.width = 90;
@@ -97,12 +105,18 @@ export class Game {
       this.reelsContainer.addChild(reel.container);
     }
     this.positionReels();
+
+    frame.width = this.reelsContainer.width + 150;
+    frame.height = this.reelsContainer.height + 140;
+    frame.x = this.reelsContainer.x - 75;
+    frame.y = this.reelsContainer.y - 93;
+    frame.zIndex = 1;
   }
 
   private positionReels() {
     if (!this.app) return;
     this.reelsContainer.x = 150;
-    this.reelsContainer.y = 75;
+    this.reelsContainer.y = 85;
   }
 
   private init() {
