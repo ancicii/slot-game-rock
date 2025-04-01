@@ -1,6 +1,8 @@
 import * as PIXI from 'pixi.js';
 import { Reel } from './Reel';
 import { UIManager } from '../ui/uiManager';
+import { BonusGame } from './BonusGame';
+import { GameManager } from '../logic/GameManager';
 
 declare global {
   interface GlobalThis {
@@ -13,6 +15,9 @@ export class Game {
   private reels: Reel[] = [];
   private reelsContainer: PIXI.Container = new PIXI.Container();
   private uiManager!: UIManager;
+  private bonusGame!: BonusGame;
+  private gameManager!: GameManager;
+  private background: PIXI.Sprite | null = null;
 
   constructor() {
     this.initializeApp();
@@ -43,18 +48,30 @@ export class Game {
     return new Promise((resolve) => {
       PIXI.Assets.load([
         `${assetsFolder}/low_1.png`,
+        `${assetsFolder}/low_1_win.png`,
         `${assetsFolder}/low_2.png`,
+        `${assetsFolder}/low_2_win.png`,
         `${assetsFolder}/low_3.png`,
+        `${assetsFolder}/low_3_win.png`,
         `${assetsFolder}/high_1.png`,
+        `${assetsFolder}/high_1_win.png`,
         `${assetsFolder}/high_2.png`,
+        `${assetsFolder}/high_2_win.png`,
         `${assetsFolder}/high_3.png`,
+        `${assetsFolder}/high_3_win.png`,
         `${assetsFolder}/high_4.png`,
+        `${assetsFolder}/high_4_win.png`,
         `${assetsFolder}/high_5.png`,
+        `${assetsFolder}/high_5_win.png`,
         `${assetsFolder}/wild.png`,
+        `${assetsFolder}/wild_win.png`,
+        `${assetsFolder}/wild_sticky.png`,
+        `${assetsFolder}/wild_sticky_win.png`,
         `${assetsFolder}/bonus.png`,
+        `${assetsFolder}/bonus_win.png`,
         `${assetsFolder}/bg_main_landscape.jpg`,
+        `${assetsFolder}/bg_bonus_landscape.jpg`,
         `${assetsFolder}/frame.png`,
-        `${assetsFolder}/bg_main_landscape.jpg`,
         `${assetsFolder}/ui/spin.png`,
         `${assetsFolder}/ui/spin_selected.png`,
         `${assetsFolder}/ui/minus.png`,
@@ -83,10 +100,15 @@ export class Game {
 
   private addBackground() {
     if (!this.app) return;
-    const bg = new PIXI.Sprite(PIXI.Texture.from('main_game/bg_main_landscape.jpg'));
-    bg.width = this.app.screen.width;
-    bg.height = this.app.screen.height;
-    this.app.stage.addChildAt(bg, 0);
+
+    if (this.background) {
+      this.app.stage.removeChild(this.background);
+    }
+
+    this.background = new PIXI.Sprite(PIXI.Texture.from('main_game/bg_main_landscape.jpg'));
+    this.background.width = this.app.screen.width;
+    this.background.height = this.app.screen.height;
+    this.app.stage.addChildAt(this.background, 0);
   }
 
   private createReels() {
@@ -122,6 +144,11 @@ export class Game {
   private init() {
     this.addBackground();
     this.createReels();
-    if (this.app) this.uiManager = new UIManager(this.app, this.reels);
+    if (this.app) {
+      this.gameManager = new GameManager();
+      this.bonusGame = new BonusGame(this.app, this.background);
+      this.uiManager = new UIManager(this.app, this.reels, this.bonusGame, this.gameManager);
+    }
   }
+
 }

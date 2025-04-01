@@ -1,4 +1,6 @@
 import * as PIXI from 'pixi.js';
+import { SpinButton } from './SpinButton';
+import { Bet } from './Bet';
 
 export class Balance {
   private balanceText: PIXI.Text;

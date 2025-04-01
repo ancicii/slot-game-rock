@@ -21,7 +21,7 @@ export class WonContainer {
     const wonBg = new PIXI.Sprite(PIXI.Texture.from('main_game/ui/b2.png'));
     wonBg.anchor.set(0.5);
     wonBg.position.set(app.screen.width / 2, app.screen.height - 122);
-    wonBg.scale.set(0.3, 0.3);
+    wonBg.scale.set(0.5, 0.35);
     uiContainer.addChild(wonBg);
 
     this.wonAmount = new PIXI.Text('1000', {
@@ -41,9 +41,9 @@ export class WonContainer {
   }
 
   public calculateWinnings(
-    winningResults: { line: number[]; count: number; winningSymbol: string | null }[], bet: Bet
+    winningResults: { line: number[]; count: number; winningSymbol: string | null }[], bet: Bet, previousWin: number = 0
   ) {
-    let win = 0;
+    let win = previousWin + 0;
     for (const result of winningResults) {
       if(!result.winningSymbol) continue;
       let i = 0;

@@ -1,22 +1,27 @@
 import * as PIXI from 'pixi.js';
 import { Balance } from './Balance';
+import { SpinButton } from './SpinButton';
 
 export class Bet {
   private betText: PIXI.Text;
   private balance: Balance;
+  private spinButton: SpinButton;
   private bet: number = 10;
 
   constructor(
     uiContainer: PIXI.Container,
     app: PIXI.Application,
-    balance: Balance
+    balance: Balance,
+    spinButton: SpinButton
   ) {
     this.balance = balance;
+    this.spinButton = spinButton;
 
     const betBg = new PIXI.Sprite(PIXI.Texture.from('main_game/ui/b2.png'));
     betBg.anchor.set(0.5);
     betBg.position.set(150, app.screen.height - 50);
     betBg.scale.set(0.3, 0.4);
+    betBg.zIndex = 1;
     uiContainer.addChild(betBg);
 
     this.betText = new PIXI.Text(this.bet, {
@@ -27,6 +32,7 @@ export class Bet {
     });
     this.betText.anchor.set(0.5);
     this.betText.position.set(betBg.x, betBg.y);
+    this.betText.zIndex = 1;
     uiContainer.addChild(this.betText);
 
     this.addArrows(uiContainer, app);
@@ -61,6 +67,10 @@ export class Bet {
     this.bet = Math.max(10, this.bet + amount);
     this.bet = Math.min(this.bet, maxBet);
     this.betText.text = this.bet.toString();
+
+    if(this.balance.getBalance() >= this.bet){
+      this.spinButton.enable();
+    }
   }
 
   public getBet(){

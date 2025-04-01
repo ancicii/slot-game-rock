@@ -13,8 +13,8 @@ export class Symbol {
     "high_3": 20,
     "high_4": 10, // Lower
     "high_5": 10,
-    "wild": 5, // Rare
-    "bonus": 5, // Rare
+    "wild": 8, // Rare
+    "bonus": 6, // Rare
   };
 
   private static readonly WEIGHTED_POOL = Symbol.generateWeightedPool();
@@ -31,9 +31,13 @@ export class Symbol {
     return pool;
   }
 
-  private static generateRandomSymbol(){
-    const randomIndex = Math.floor(Math.random() * Symbol.WEIGHTED_POOL.length);
-    return Symbol.WEIGHTED_POOL[randomIndex];
+  private static generateRandomSymbol(isBonus: boolean): string {
+    const filteredPool = isBonus
+      ? Symbol.WEIGHTED_POOL.filter((symbol) => symbol !== "bonus")
+      : Symbol.WEIGHTED_POOL;
+  
+    const randomIndex = Math.floor(Math.random() * filteredPool.length);
+    return filteredPool[randomIndex];
   }
 
   public static generateWinningSymbol(): string {
@@ -45,11 +49,14 @@ export class Symbol {
     return validSymbols[randomIndex];
   }
 
-  constructor(y: number, symbolName?: string) {
+  constructor(y: number, isBonusGame: boolean, isBonus: boolean, symbolName?: string) {
    
-    this.textureName = symbolName || Symbol.generateRandomSymbol();
+    this.textureName = symbolName || Symbol.generateRandomSymbol(isBonus);
+    if (isBonusGame && this.textureName === "wild") {
+      this.textureName = "wild_sticky";
+    }
     this.sprite = PIXI.Sprite.from(`main_game/${this.textureName}.png`);
-
+    (this.sprite as any).textureName = this.textureName;
     this.sprite.scale.set(0.8);
     this.sprite.y = y;
   }
